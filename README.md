@@ -11,6 +11,7 @@ responsabilă pentru o parte specifică a sistemului.
 
     safe-ro-project-main/
     │
+    
     ├── safe_ro_core.py        # Motorul logicii aplicației (core logic)
     
     ├── safe_ro_api.py         # API pentru acces programatic
