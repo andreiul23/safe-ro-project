@@ -18,6 +18,7 @@ responsabilă pentru o parte specifică a sistemului.
     ├── safe_ro_demo.ipynb     # Notebook demonstrativ
     ├── test_core.py           # Teste unitare
     └── .idea/                 # Setări de proiect pentru JetBrains IDE
+    
 
 ------------------------------------------------------------------------
 
