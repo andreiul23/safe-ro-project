@@ -12,11 +12,17 @@ responsabilă pentru o parte specifică a sistemului.
     safe-ro-project-main/
     │
     ├── safe_ro_core.py        # Motorul logicii aplicației (core logic)
+    
     ├── safe_ro_api.py         # API pentru acces programatic
+
     ├── safe_ro_dash.py        # Dashboard pentru vizualizări
+    
     ├── safe_ro_gui.py         # Interfață grafică standalone
+    
     ├── safe_ro_demo.ipynb     # Notebook demonstrativ
+    
     ├── test_core.py           # Teste unitare
+    
     └── .idea/                 # Setări de proiect pentru JetBrains IDE
     
 
