@@ -10,6 +10,7 @@ responsabilă pentru o parte specifică a sistemului.
  1. Structura proiectului
 
     safe-ro-project-main/
+    
     │
     
     ├── safe_ro_core.py        # Motorul logicii aplicației (core logic)
