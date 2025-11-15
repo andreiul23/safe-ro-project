@@ -93,9 +93,10 @@ test_core.py
 1. Clonare / extragere proiect
 
     unzip safe-ro-project-main.zip
+   
     cd safe-ro-project-main
 
-2. Instalare dependențe
+3. Instalare dependențe
 
 Dacă există un requirements.txt, rulează:
 
