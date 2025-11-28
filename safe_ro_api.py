@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
 
-from safe_ro_core import NDVIProcessor, Sentinel1FloodDetector, FireDetector
+from safe_ro_core import NDVIProcessor, Sentinel1FloodDetector
 
 app = FastAPI(title="SAFE-RO API", version="0.1.0")
 
@@ -21,11 +21,6 @@ class NDVIRequest(BaseModel):
 class FloodRequest(BaseModel):
     s1_path: str
     threshold: Optional[float] = None
-
-
-class FireRequest(BaseModel):
-    csv_path: str
-    min_confidence: int = 80
 
 
 @app.get("/health")
@@ -53,11 +48,6 @@ def flood_endpoint(req: FloodRequest):
     return {"flooded_area_percent": flooded_percent}
 
 
-@app.post("/fires")
-def fires_endpoint(req: FireRequest):
-    det = FireDetector(req.csv_path)
-    fires = det.filter_by_confidence(req.min_confidence)
-    return {
-        "count": int(len(fires)),
-        "example": fires.head(5).to_dict(orient="records"),
-    }
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the SAFE-RO API"}

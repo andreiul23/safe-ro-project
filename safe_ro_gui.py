@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
     QLabel, QFileDialog, QTextEdit, QLineEdit, QGroupBox
 )
 
-from safe_ro_core import NDVIProcessor, Sentinel1FloodDetector, FireDetector
+from safe_ro_core import NDVIProcessor, Sentinel1FloodDetector
 
 
 class SafeROGUI(QWidget):
@@ -19,7 +19,6 @@ class SafeROGUI(QWidget):
         self.red_path = ""
         self.nir_path = ""
         self.s1_path = ""
-        self.firms_path = ""
 
         # Widgets
         self.output_box = QTextEdit()
@@ -34,7 +33,6 @@ class SafeROGUI(QWidget):
 
         main_layout.addWidget(self._create_ndvi_group())
         main_layout.addWidget(self._create_flood_group())
-        main_layout.addWidget(self._create_fire_group())
 
         # Output box
         main_layout.addWidget(QLabel("Console output:"))
@@ -99,25 +97,6 @@ class SafeROGUI(QWidget):
         group.setLayout(layout)
         return group
 
-    def _create_fire_group(self):
-        group = QGroupBox("Fire detections (FIRMS CSV)")
-        layout = QVBoxLayout()
-
-        firms_layout = QHBoxLayout()
-        self.firms_line = QLineEdit()
-        btn_firms = QPushButton("Select FIRMS CSV")
-        btn_firms.clicked.connect(self.select_firms)
-        firms_layout.addWidget(self.firms_line)
-        firms_layout.addWidget(btn_firms)
-
-        btn_fires = QPushButton("Count high-confidence fires")
-        btn_fires.clicked.connect(self.detect_fires)
-
-        layout.addLayout(firms_layout)
-        layout.addWidget(btn_fires)
-        group.setLayout(layout)
-        return group
-
     # ---------------- File selection slots ---------------- #
 
     def select_red(self):
@@ -137,12 +116,6 @@ class SafeROGUI(QWidget):
         if path:
             self.s1_path = path
             self.s1_line.setText(path)
-
-    def select_firms(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select FIRMS CSV", "", "CSV files (*.csv)")
-        if path:
-            self.firms_path = path
-            self.firms_line.setText(path)
 
     # ---------------- Actions ---------------- #
 
@@ -180,15 +153,6 @@ class SafeROGUI(QWidget):
         mask = det.detect(threshold=threshold)
         flooded_percent = float(mask.mean() * 100.0)
         self.log(f"[FLOOD] Estimated flooded area: {flooded_percent:.2f}%")
-
-    def detect_fires(self):
-        if not Path(self.firms_path).is_file():
-            self.log("[FIRE] Please select a FIRMS CSV file.")
-            return
-
-        det = FireDetector(self.firms_path)
-        fires = det.filter_by_confidence(80)
-        self.log(f"[FIRE] High-confidence fires (>=80): {len(fires)}")
 
 
 
