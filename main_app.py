@@ -441,13 +441,13 @@ elif mode == "Local Analysis":
             else:
                 st.warning("Please upload both RED and NIR band files.")
 
-from firms_client import FIRMSClient
+    from firms_client import FIRMSClient
 
-# ... (existing imports)
+    # ... (existing imports)
 
-# ... (existing code up to the local analysis mode)
+    # ... (existing code up to the local analysis mode)
 
-# -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
     # --- TAB 3: FIRES ---
     with tab3:
         st.header("Real-time Fire Alerts (FIRMS)")
