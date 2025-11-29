@@ -233,8 +233,8 @@ if mode == "Home":
 
         st.markdown("---")
         st.image("https://images.unsplash.com/photo-1451187580459-43490279c0fa",
-                 caption="Sentinel Constellation View",
-                 use_container_width=True)
+                caption="Sentinel Constellation View",
+                use_container_width=True)
 
     with col2:
         st.info(f"📍 **Current Region:** {selected_region}")
@@ -259,10 +259,10 @@ elif mode == "Citizen App":
         with st.spinner("Querying Google Earth Engine..."):
             map_data = gee_client.get_ndvi(gee_aoi, str(start_date), str(end_date))
             if map_data is None:
-                 st.warning("No Sentinel-2 data found for the selected period. Trying Sentinel-1 for floods.")
-                 map_data = gee_client.get_flood_data(gee_aoi, str(start_date), str(end_date))
-                 map_type = "water"
-                 if map_data is None:
+                st.warning("No Sentinel-2 data found for the selected period. Trying Sentinel-1 for floods.")
+                map_data = gee_client.get_flood_data(gee_aoi, str(start_date), str(end_date))
+                map_type = "water"
+                if map_data is None:
                     st.error("No data found for the selected region and date range.")
 
 
@@ -414,7 +414,7 @@ elif mode == "Local Analysis":
         if st.button("🚀 Analyze Local Files"):
             if uploaded_red and uploaded_nir:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as tr, \
-                     tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as tn:
+                    tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as tn:
                     
                     tr.write(uploaded_red.read())
                     tn.write(uploaded_nir.read())
