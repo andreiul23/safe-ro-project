@@ -448,9 +448,6 @@ from firms_client import FIRMSClient
 # ... (existing code up to the local analysis mode)
 
 # -----------------------------------------------------------------------------
-    # ... (existing local analysis code) ...
-
-
     # --- TAB 3: FIRES ---
     with tab3:
         st.header("Real-time Fire Alerts (FIRMS)")
