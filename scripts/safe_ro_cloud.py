@@ -1,56 +1,52 @@
 import os
+import sys
 import time
 import requests
 import zipfile
-import shutil
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
-# --- DEFINING REGIONS ---
-# You can add as many as you want here!
-# --- DEFINING REGIONS ---
-# Format: "Name": [min_lon, min_lat, max_lon, max_lat]
-REGIONS = {
-    "Fagaras":   [24.5, 45.5, 25.5, 46.0], # Central Mountains
-    "Iasi":      [27.5, 47.0, 27.8, 47.3], # Moldova
-    "Timisoara": [21.1, 45.6, 21.4, 45.9], # Banat
-    # "Craiova":   [23.7, 44.2, 24.0, 44.5], # Oltenia
-    # "Constanta": [28.5, 44.1, 28.8, 44.4], # Dobrogea (Black Sea)
-    # "Baia Mare": [23.4, 47.5, 23.7, 47.8], # Maramures
-    # "Bucuresti": [25.9, 44.3, 26.2, 44.6], # Muntenia (Capital)
-    # "Cluj":      [23.5, 46.7, 23.8, 47.0]  # Transylvania North
-}
+# Add src directory to path to allow for sibling imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+# --- DEFINING REGIONS ---
+REGIONS = {
+    "Fagaras":   [24.5, 45.5, 25.5, 46.0],
+    "Iasi":      [27.5, 47.0, 27.8, 47.3],
+    "Timisoara": [21.1, 45.6, 21.4, 45.9],
+}
 
 # ==========================================
 # 1. GOOGLE DRIVE MANAGER
 # ==========================================
 class DriveManager:
     def __init__(self, folder_name="SAFE_RO_Cloud_Data"):
+        self.creds_path = os.path.join(os.path.dirname(__file__), '..', 'mycreds.txt')
         self.drive = self._auth()
-        self.folder_name = folder_name
-        self.folder_id = self._get_or_create_folder(folder_name)
+        if self.drive:
+            self.folder_id = self._get_or_create_folder(folder_name)
+        else:
+            self.folder_id = None
 
     def _auth(self):
         gauth = GoogleAuth()
-        gauth.LoadCredentialsFile("mycreds.txt")
-        if gauth.credentials is None:
-            print("[AUTH] Opening browser for login...")
-            gauth.GetFlow()
-            gauth.flow.params.update({'access_type': 'offline', 'prompt': 'consent'})
-            gauth.LocalWebserverAuth(port_numbers=[8080])
-        elif gauth.access_token_expired:
-            try:
+        try:
+            gauth.LoadCredentialsFile(self.creds_path)
+            if gauth.credentials is None:
+                print("[AUTH] No valid credentials. Please run interactively first.")
+                return None
+            elif gauth.access_token_expired:
                 gauth.Refresh()
-            except:
-                if os.path.exists("mycreds.txt"): os.remove("mycreds.txt")
-                return self._auth()
-        else:
-            gauth.Authorize()
-        gauth.SaveCredentialsFile("mycreds.txt")
-        return GoogleDrive(gauth)
+            else:
+                gauth.Authorize()
+            gauth.SaveCredentialsFile(self.creds_path)
+            return GoogleDrive(gauth)
+        except Exception as e:
+            print(f"[AUTH] Error: {e}")
+            return None
 
     def _get_or_create_folder(self, folder_name):
+        # ... (rest of the class is unchanged)
         file_list = self.drive.ListFile({
                                             'q': f"title='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"}).GetList()
         if file_list: return file_list[0]['id']
@@ -190,22 +186,22 @@ class HybridDownloader:
 
 
 if __name__ == "__main__":
-    # !!! UPDATE CREDENTIALS !!!
-    COP_USER = "farcastiberia@yahoo.com"
-    COP_PASS = "Rospin_proiect2025"
-    DOWNLOAD_LOCATION = "D:/SAFE_RO_Temp"
+    if len(sys.argv) != 4:
+        print("Usage: python safe_ro_cloud.py <copernicus_user> <copernicus_pass> <download_location>")
+        sys.exit(1)
+
+    COP_USER = sys.argv[1]
+    COP_PASS = sys.argv[2]
+    DOWNLOAD_LOCATION = sys.argv[3]
 
     try:
         drive = DriveManager("SAFE_RO_Cloud_Data")
-        dl = HybridDownloader(COP_USER, COP_PASS)
-
-        # LOOP THROUGH ALL REGIONS
-        for region_name, bbox in REGIONS.items():
-            files = dl.process_region(region_name, bbox, DOWNLOAD_LOCATION)
-            for f in files:
-                # Upload with Region Tag (e.g., "Iasi_S2B_....jp2")
-                drive.upload_file(f, region_name)
-
-        print("\n🎉 All Regions Updated Successfully!")
+        if drive.folder_id:
+            dl = HybridDownloader(COP_USER, COP_PASS)
+            for region_name, bbox in REGIONS.items():
+                files = dl.process_region(region_name, bbox, DOWNLOAD_LOCATION)
+                for f in files:
+                    drive.upload_file(f, region_name)
+            print("\n🎉 All Regions Updated Successfully!")
     except Exception as e:
         print(f"Error: {e}")
