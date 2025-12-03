@@ -55,10 +55,9 @@ def get_gee_client():
         st.error("Missing GEE project configuration. Please create a file `.streamlit/secrets.toml` and add `gee_project = 'your-project-id'`.")
         st.stop()
 
-@st.cache_resource
 def get_gdrive_client():
     """Initializes the Google Drive client, which handles its own auth."""
-    return GDriveClient()
+    return GDriveClient.get_instance()
 
 # Initialize clients
 gee_client = get_gee_client()

@@ -5,19 +5,26 @@ from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
 
 class GDriveClient:
+    _instance = None
+
+    @st.cache_resource
+    def get_instance():
+        """
+        Returns a cached singleton instance of the GDriveClient.
+        """
+        if GDriveClient._instance is None:
+            GDriveClient._instance = GDriveClient()
+        return GDriveClient._instance
+
     def __init__(self):
         self.drive = self._auth()
 
-    @st.cache_resource
-    def _auth(_self):
+    def _auth(self):
         """
-        Authenticates with Google Drive using Streamlit secrets for deployment
-        or a local 'mycreds.txt' file for development.
-        The '_self' is used to make this method cacheable by Streamlit.
+        Authenticates with Google Drive using Streamlit secrets or a local file.
         """
         creds_path = "mycreds.txt"
         
-        # For deployment, create credentials from Streamlit secrets
         if not os.path.exists(creds_path) and "gdrive_creds_json" in st.secrets:
             with open(creds_path, "w") as f:
                 f.write(st.secrets["gdrive_creds_json"])
@@ -25,14 +32,13 @@ class GDriveClient:
         gauth = GoogleAuth()
         
         if not os.path.exists(creds_path):
-            st.error(f"❌ Google Drive credentials file ('{creds_path}') not found.")
-            st.info("For local development, run authentication locally. For deployment, add 'gdrive_creds_json' to your Streamlit secrets.")
+            st.error(f"❌ Google Drive credentials ('{creds_path}') not found.")
             return None
             
         gauth.LoadCredentialsFile(creds_path)
 
         if gauth.credentials is None:
-            st.error(f"❌ Credentials in '{creds_path}' are invalid. Please re-authenticate.")
+            st.error(f"❌ Credentials in '{creds_path}' are invalid.")
             return None
         elif gauth.access_token_expired:
             try:
@@ -52,7 +58,6 @@ class GDriveClient:
             return []
             
         try:
-            # 1. Find folder ID
             folder_list = self.drive.ListFile(
                 {'q': f"title='{folder_name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"}
             ).GetList()
@@ -62,12 +67,7 @@ class GDriveClient:
                 return []
 
             folder_id = folder_list[0]['id']
-
-            # 2. List files inside the folder
-            query = f"'{folder_id}' in parents and trashed=false"
-            files = self.drive.ListFile({'q': query}).GetList()
-
-            # Sort files by title (useful for date-based naming)
+            files = self.drive.ListFile({'q': f"'{folder_id}' in parents and trashed=false"}).GetList()
             files.sort(key=lambda x: x['title'], reverse=True)
             return files
         except Exception as e:
@@ -75,19 +75,17 @@ class GDriveClient:
             return []
 
     def download_file(self, file_obj):
-        """Downloads a Google Drive file object to a temporary local file."""
+        """Downloads a Google Drive file to a temporary local file."""
         if not self.drive:
             return None
             
         try:
-            # Create a temp file with the correct extension to preserve the format
             ext = os.path.splitext(file_obj['title'])[1]
             with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tfile:
                 file_path = tfile.name
             
-            # Download the file content
             file_obj.GetContentFile(file_path)
             return file_path
         except Exception as e:
-            st.error(f"Failed to download file '{file_obj['title']}' from Google Drive: {e}")
+            st.error(f"Failed to download '{file_obj['title']}': {e}")
             return None
