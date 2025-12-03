@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
 import streamlit as st
 import ee
 import numpy as np
@@ -6,7 +10,6 @@ from streamlit_folium import st_folium
 from matplotlib import cm
 import datetime
 import tempfile
-import os
 import matplotlib.pyplot as plt
 
 # Corrected imports after refactoring
@@ -55,9 +58,10 @@ def get_gee_client():
         st.error("Missing GEE project configuration. Please create a file `.streamlit/secrets.toml` and add `gee_project = 'your-project-id'`.")
         st.stop()
 
+@st.cache_resource
 def get_gdrive_client():
     """Initializes the Google Drive client, which handles its own auth."""
-    return GDriveClient.get_instance()
+    return GDriveClient()
 
 # Initialize clients
 gee_client = get_gee_client()
@@ -251,8 +255,7 @@ elif mode == "Local Analysis":
                                     mask, bounds = proc.detect()
                                     create_folium_map(mask, bounds, "water")
                                 finally:
-                                    os..py
-
+                                                                         os.remove(path_radar)
     # --- TAB 2: MANUAL UPLOAD ---
     with tab2:
         # ... (code remains the same)
