@@ -1,166 +1,82 @@
-SAFE-RO Project — Documentație Detaliată
+# SAFE-RO Project
 
-SAFE-RO este un proiect modular orientat spre procesarea, analiza și
-afișarea datelor într‑un mediu sigur și controlat. Arhitectura
-proiectului este împărțită pe mai multe componente clare, fiecare
-responsabilă pentru o parte specifică a sistemului.
+## Overview
 
-------------------------------------------------------------------------
+SAFE-RO is a Python-based platform for environmental monitoring in Romania, focusing on flood detection and vegetation analysis using satellite imagery. It provides a web-based graphical user interface (GUI) for interactive analysis, a RESTful API for programmatic access, and a data pipeline for acquiring and processing satellite data.
 
- 1. Structura proiectului
+## Project Structure
 
-    safe-ro-project-main/
-    
-    │
-    
-    ├── safe_ro_core.py        # Motorul logicii aplicației (core logic)
-    
-    ├── safe_ro_api.py         # API pentru acces programatic
+The project is organized into the following directories:
 
-    ├── safe_ro_dash.py        # Dashboard pentru vizualizări
-    
-    ├── safe_ro_gui.py         # Interfață grafică standalone
-    
-    ├── safe_ro_demo.ipynb     # Notebook demonstrativ
-    
-    ├── test_core.py           # Teste unitare
-    
-    └── .idea/                 # Setări de proiect pentru JetBrains IDE
-    
+- `src/safe_ro`: Contains the main source code for the project.
+  - `core`: Core scientific logic for raster data processing.
+  - `clients`: Modules for interacting with external services like Google Earth Engine, Google Drive, and NASA FIRMS.
+  - `interfaces`: User interfaces, including the Streamlit web application and the FastAPI.
+- `scripts`: Standalone scripts for tasks like data acquisition.
+- `tests`: Unit and integration tests for the project.
 
-------------------------------------------------------------------------
+## Getting Started
 
- 2. Descriere module
+### Prerequisites
 
-safe_ro_core.py
+- Python 3.9+
+- Pip
+- Git
 
--   Reprezintă nucleul aplicației.
--   Conține logica principală, clasele și funcțiile esențiale.
--   Asigură procesarea datelor și gestionarea operațiilor fundamentale.
+### Installation
 
-safe_ro_api.py
-
--   Oferă o interfață tip API (HTTP sau locală) pentru acces extern.
--   Permite integrarea SAFE-RO cu alte aplicații.
--   Tipuri de funcționalități expuse:
-    -   citire date
-    -   execuție operații din core
-    -   interogări/status
-
-safe_ro_dash.py
-
--   Conține o interfață de tip dashboard (probabil bazată pe Dash /
-    Plotly).
--   Oferă vizualizări grafice, diagrame sau panouri de control.
--   Util pentru monitorizare și analiză vizuală.
-
-safe_ro_gui.py
-
--   Interfață grafică desktop stand‑alone.
--   Poate fi utilizată fără browser sau server extern.
--   Ideală pentru utilizatori non-tehnici.
-
-safe_ro_demo.ipynb
-
--   Notebook Jupyter care demonstrează utilizarea componentelor.
--   Conține exemple, grafice și teste rapide.
-
-test_core.py
-
--   Teste unitare pentru modulul „core”.
--   Permite verificarea funcționalităților principale.
-
-------------------------------------------------------------------------
-
-3. Cerințe
-
--   Python 3.10+
--   Biblioteci suplimentare (depinde de ce este în fișiere, recomand
-    implicit):
-    -   requests
-    -   flask / fastapi (dacă API-ul le folosește)
-    -   dash / plotly (pentru dashboard)
-    -   tkinter sau alte toolkituri grafice
-    -   pytest sau unittest
-
-(Instalarea exactă depinde de cerințele din cod)
-
-------------------------------------------------------------------------
-
- 4. Instalare și rulare
-    
-------------------------------------------------------------------------
-1. Clonare / extragere proiect
-
-    unzip safe-ro-project-main.zip
-   
-    cd safe-ro-project-main
-
-3. Instalare dependențe
-
-Dacă există un requirements.txt, rulează:
-
+1.  Clone the repository:
+    ```bash
+    git clone <repository-url>
+    ```
+2.  Navigate to the project directory:
+    ```bash
+    cd SAFE_RO_Project
+    ```
+3.  Install the required dependencies:
+    ```bash
     pip install -r requirements.txt
+    ```
 
-Dacă nu există, instalează manual pachetele necesare.
+### Configuration
 
-3. Rularea interfeței GUI
+1.  **Google Earth Engine**: Create a file `.streamlit/secrets.toml` and add your GEE project ID:
+    ```toml
+    gee_project = "your-project-id"
+    ```
+2.  **Google Drive**: For local development, run the application once to authenticate with Google Drive. This will create a `mycreds.txt` file. For deployment, add your Google Drive credentials as a Streamlit secret:
+    ```toml
+    gdrive_creds_json = "..."
+    ```
+3.  **FIRMS**: Add your FIRMS API key to `.streamlit/secrets.toml`:
+    ```toml
+    firms_api_key = "your-api-key"
+    ```
 
-    python safe_ro_gui.py
+## How to Run
 
-4. Rularea dashboard-ului
+### Web Application
 
-    python safe_ro_dash.py
+To run the Streamlit web application, use the following command:
 
-5. Pornirea API‑ului
+```bash
+streamlit run src/safe_ro/interfaces/main_app.py
+```
 
-    python safe_ro_api.py
+### API
 
-------------------------------------------------------------------------
+To run the FastAPI, use the following command:
 
- 5. Rulare teste
+```bash
+uvicorn safe_ro.interfaces.safe_ro_api:app --reload
+```
 
-    python -m unittest test_core.py
+The API documentation will be available at `http://127.0.0.1:8000/docs`.
 
-Dacă folosești pytest:
+### Tests
 
-    pytest
+To run the test suite, use the following command:
 
-------------------------------------------------------------------------
-
- 6. Arhitectură generală
-
-            +------------------+
-            |   Aplicatii      |
-            |   Externe        |
-            +--------+---------+
-                     |
-                     v
-            +--------+---------+
-            |   API (HTTP)     |
-            |  safe_ro_api.py  |
-            +--------+---------+
-                     |
-                     v
-          +----------+-----------+
-          |   CORE (Logica)      |
-          |  safe_ro_core.py     |
-          +----------+-----------+
-                     |
-          +----------+------------+
-          | Vizualizare (GUI/Dash)|
-          | safe_ro_gui.py / dash |
-          +------------------------+
-
-
-
-------------------------------------------------------------------------
-
- 7. Status proiect
-
--   Activ / în dezvoltare.
--   Compatibil cu Python 3.10+
--   Modular și ușor de extins.
-
-------------------------------------------------------------------------
-
+```bash
+pytest
+```
