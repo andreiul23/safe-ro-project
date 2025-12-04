@@ -1,105 +1,73 @@
-a# SAFE-RO Project
+# Welcome to your Lovable project
 
-## Overview
+## Project info
 
-SAFE-RO is a Python-based platform for environmental monitoring in Romania, leveraging satellite imagery for flood detection, vegetation analysis, and fire monitoring. It offers a suite of tools, including a web-based graphical user interface (GUI) for interactive analysis, a RESTful API for programmatic access, and a data pipeline for acquiring and processing satellite data from various sources.
+**URL**: https://lovable.dev/projects/b142a347-9f4a-4e2d-ae31-bf3929bc6341
 
-The platform is designed for a range of users, from citizens checking local conditions to authorities performing detailed analysis.
+## How can I edit this code?
 
-## Features
+There are several ways of editing your application.
 
--   **Multi-Hazard Monitoring**: Analyze and visualize data for floods, vegetation health (NDVI), and active fires.
--   **Multiple Data Sources**: 
-    -   **Google Earth Engine**: Real-time analysis of Sentinel-1 (Radar) and Sentinel-2 (Optical) data.
-    -   **Google Drive**: Process your own satellite imagery stored in Google Drive.
-    -   **Local Upload**: Analyze raster files directly from your computer.
-    -   **NASA FIRMS**: Fetch and display active fire data.
--   **Interactive Web Application**: 
-    -   A user-friendly interface built with Streamlit.
-    -   Different modes for various user needs: a citizen-facing app, an authority dashboard, and a local analysis workbench.
-    -   Interactive maps with Folium for visualizing data overlays.
--   **RESTful API**: 
-    -   A FastAPI-based API for programmatic access to core functionalities.
-    -   Endpoints for NDVI calculation and flood detection.
--   **Modular and Extensible**: The project is organized into distinct modules for core logic, clients, and interfaces, making it easy to extend and adapt.
+**Use Lovable**
 
-## Project Structure
+Simply visit the [Lovable Project](https://lovable.dev/projects/b142a347-9f4a-4e2d-ae31-bf3929bc6341) and start prompting.
 
-The project is organized into the following directories:
+Changes made via Lovable will be committed automatically to this repo.
 
--   `src/safe_ro`: Contains the main source code for the project.
-    -   `core`: Core scientific logic for raster data processing (NDVI, flood detection).
-    -   `clients`: Modules for interacting with external services like Google Earth Engine, Google Drive, and NASA FIRMS.
-    -   `interfaces`: User interfaces, including the Streamlit web application (`main_app.py`) and the FastAPI (`safe_ro_api.py`).
--   `scripts`: Standalone scripts for tasks like data acquisition.
--   `tests`: Unit and integration tests for the project.
+**Use your preferred IDE**
 
-## Getting Started
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-### Prerequisites
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
--   Python 3.9+
--   Pip
--   Git
+Follow these steps:
 
-### Installation
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    ```
-2.  Navigate to the project directory:
-    ```bash
-    cd SAFE_RO_Project
-    ```
-3.  Install the required dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-### Configuration
+# Step 3: Install the necessary dependencies.
+npm i
 
-1.  **Google Earth Engine**: Create a file `.streamlit/secrets.toml` and add your GEE project ID:
-    ```toml
-    gee_project = "your-project-id"
-    ```
-2.  **Google Drive**: For local development, you need to authenticate with Google Drive. Run the following command and follow the instructions in your browser:
-    ```bash
-    python scripts/authenticate_gdrive.py
-    ```
-    This will create a `mycreds.txt` file. For deployment, add your Google Drive credentials as a Streamlit secret:
-    ```toml
-    gdrive_creds_json = "..."
-    ```
-3.  **FIRMS**: Add your FIRMS API key to `.streamlit/secrets.toml`:
-    ```toml
-    firms_api_key = "your-api-key"
-    ```
-
-## How to Run
-
-### Web Application
-
-To run the Streamlit web application, use the following command:
-
-```bash
-streamlit run src/safe_ro/interfaces/main_app.py
+# Step 4: Start the development server with auto-reloading and an instant preview.
+npm run dev
 ```
 
-### API
+**Edit a file directly in GitHub**
 
-To run the FastAPI, use the following command:
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-```bash
-uvicorn src.safe_ro.interfaces.safe_ro_api:app --reload
-```
+**Use GitHub Codespaces**
 
-The API documentation will be available at `http://127.0.0.1:8000/docs`.
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-### Tests
+## What technologies are used for this project?
 
-To run the test suite, use the following command:
+This project is built with:
 
-```bash
-pytest
-```
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
+
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/b142a347-9f4a-4e2d-ae31-bf3929bc6341) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
