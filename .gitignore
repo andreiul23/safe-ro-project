@@ -1,6 +1,7 @@
 __pycache__/
 *.idea/
 .pytest_cache/
+.ruff_cache/
 .venv/
 mycreds.txt
 client_secrets.json
