@@ -30,7 +30,6 @@ pyparsing==3.2.5
 python-dotenv==1.2.1
 python-multipart==0.0.20
 PyYAML==6.0.3
-rasterio==1.4.3
 rich==14.2.0
 rich-toolkit==0.15.1
 rignore==0.7.6
@@ -51,3 +50,7 @@ opencv-python
 PyQt5
 pydrive2
 streamlit-folium
+black
+ruff
+earthengine-api
+matplotlib

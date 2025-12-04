@@ -1,5 +1,6 @@
 import sys
 import os
+import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
@@ -98,12 +99,34 @@ def create_folium_map(data, bounds, data_type="ndvi", height=500):
 
     if data is not None and data.size > 0:
         colormap = cm.RdYlGn if data_type == "ndvi" else cm.Blues
-        colored_data = colormap(
-            (data.astype(float) + 1) / 2 if data_type == "ndvi" else data.astype(float)
-        )
+
+        # Create a copy to avoid modifying the original data
+        data_copy = data.astype(float)
+
+        # Replace NaNs with a temporary value (e.g., 0) before colormapping
+        nan_mask = np.isnan(data_copy)
+        data_copy[nan_mask] = 0
+
+        # Normalize data to 0-1 range for the colormap
+        if data_type == "ndvi":
+            norm_data = (data_copy + 1) / 2
+        else:
+            norm_data = data_copy
+
+        # Apply colormap.
+        colored_data_float = colormap(norm_data)
+
+        # Use the original nan_mask to set the alpha channel to 0 (transparent)
+        colored_data_float[nan_mask, 3] = 0
+
+        # As a final brute-force measure, replace any remaining NaNs.
+        np.nan_to_num(colored_data_float, copy=False, nan=0.0)
+
+        # Convert the float RGBA array [0,1] to a uint8 array [0,255]
+        colored_data_uint8 = (colored_data_float * 255).astype(np.uint8)
 
         folium.raster_layers.ImageOverlay(
-            image=colored_data,
+            image=colored_data_uint8,
             bounds=map_bounds,
             opacity=0.7,
             name=f"{data_type.upper()} Overlay",
@@ -170,19 +193,26 @@ elif mode == "Citizen App":
     )
     st.subheader("Live Satellite Map")
     show_sat = st.toggle("Overlay Satellite Data", value=False)
-    map_data, map_type = None, "ndvi"
+    map_data, map_type, bounds_to_use = None, "ndvi", current_bbox
     if show_sat:
         with st.spinner("Querying Google Earth Engine..."):
-            map_data = gee_client.get_ndvi(gee_aoi, str(start_date), str(end_date))
+            map_data, new_bounds, error_msg = gee_client.get_ndvi(
+                gee_aoi, str(start_date), str(end_date)
+            )
             if map_data is None:
-                st.warning("No Sentinel-2 data found. Trying Sentinel-1 for floods.")
-                map_data = gee_client.get_flood_data(
+                st.warning(f"NDVI Error: {error_msg}. Trying Sentinel-1 for floods.")
+                map_data, new_bounds, error_msg = gee_client.get_flood_data(
                     gee_aoi, str(start_date), str(end_date)
                 )
                 map_type = "water"
-            if map_data is None:
-                st.error("No data found for the selected region and date range.")
-    create_folium_map(map_data, current_bbox, data_type=map_type)
+
+            if map_data is not None:
+                if new_bounds:
+                    bounds_to_use = new_bounds
+            else:
+                st.error(error_msg or "No data found for the selected region and date range.")
+
+    create_folium_map(map_data, bounds_to_use, data_type=map_type)
 
 # --- MODE: AUTHORITY DASHBOARD ---
 elif mode == "Authority Dashboard":
@@ -192,35 +222,40 @@ elif mode == "Authority Dashboard":
 
     tab1, tab2 = st.tabs(["Vegetation (S2)", "Floods (S1)"])
 
-        with tab1:
-            if st.button("Analyze Vegetation Health"):
-                with st.spinner("Processing NDVI with GEE..."):
-                    st.session_state.dash_data = gee_client.get_ndvi(
-                        gee_aoi, str(start_date), str(end_date)
-                    )
-                    st.session_state.dash_type = "ndvi"
-                    if st.session_state.dash_data is None:
-                        st.error("Could not retrieve Sentinel-2 data.")
+    with tab1:
+        if st.button("Analyze Vegetation Health"):
+            with st.spinner("Processing NDVI with GEE..."):
+                (
+                    st.session_state.dash_data,
+                    st.session_state.dash_bounds,
+                    error_msg,
+                ) = gee_client.get_ndvi(gee_aoi, str(start_date), str(end_date))
+                st.session_state.dash_type = "ndvi"
+                if st.session_state.dash_data is None:
+                    st.error(error_msg or "Could not retrieve Sentinel-2 data.")
 
-        with tab2:
-            if st.button("Analyze Flood Risk"):
-                with st.spinner("Processing Flood Data with GEE..."):
-                    st.session_state.dash_data = gee_client.get_flood_data(
-                        gee_aoi, str(start_date), str(end_date)
-                    )
-                    st.session_state.dash_type = "water"
-                    if st.session_state.dash_data is None:
-                        st.error("Could not retrieve Sentinel-1 data.")
+    with tab2:
+        if st.button("Analyze Flood Risk"):
+            with st.spinner("Processing Flood Data with GEE..."):
+                (
+                    st.session_state.dash_data,
+                    st.session_state.dash_bounds,
+                    error_msg,
+                ) = gee_client.get_flood_data(gee_aoi, str(start_date), str(end_date))
+                st.session_state.dash_type = "water"
+                if st.session_state.dash_data is None:
+                    st.error(error_msg or "Could not retrieve Sentinel-1 data.")
 
-        st.divider()
+    st.divider()
 
-        if "dash_data" in st.session_state:
-            st.subheader("Geospatial Analysis")
-            create_folium_map(
-                st.session_state.dash_data,
-                current_bbox,
-                data_type=getattr(st.session_state, "dash_type", "ndvi"),
-            )
+    if "dash_data" in st.session_state and st.session_state.dash_data is not None:
+        st.subheader("Geospatial Analysis")
+        bounds = st.session_state.get("dash_bounds") or current_bbox
+        create_folium_map(
+            st.session_state.dash_data,
+            bounds,
+            data_type=getattr(st.session_state, "dash_type", "ndvi"),
+        )
 
 # --- MODE: LOCAL ANALYSIS ---
 elif mode == "Local Analysis":
