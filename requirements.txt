@@ -54,3 +54,4 @@ black
 ruff
 earthengine-api
 matplotlib
+pytest

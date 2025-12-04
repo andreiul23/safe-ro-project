@@ -1,7 +1,10 @@
 import os
+import sys
 import numpy as np
 import rasterio
 import pytest
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 # Corrected import path after refactoring
 from safe_ro.core.safe_ro_core import RasterBand, NDVIProcessor, Sentinel1FloodDetector
